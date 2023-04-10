@@ -10,7 +10,7 @@ const fakeStripeAPI = async ({ amount, currency }) => {
 
 const createOrder = async (req, res) => {
   console.log(req.user);
-  const { tax, kind } = req.body;
+  const { tax, kind, carBrand, carModel, licensePlate } = req.body;
 
   if (!tax) {
     throw new CustomError.BadRequestError("Please provide tax");
@@ -32,6 +32,9 @@ const createOrder = async (req, res) => {
     subtotal,
     tax,
     kind,
+    carBrand,
+    carModel,
+    licensePlate,
     clientSecret: paymentIntent.client_secret,
     user: req.user.userId,
   });
@@ -63,12 +66,14 @@ const getCurrentUserOrders = async (req, res) => {
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
 const updateOrder = async (req, res) => {
-  const { id: orderId } = req.params;
+  const orderId = req.params.id.trim();
   const { paymentIntentId } = req.body;
 
   const order = await Order.findOne({ _id: orderId });
   if (!order) {
-    throw new CustomError.NotFoundError(`No order with id : ${orderId}`);
+    throw new CustomError.NotFoundError(
+      `Esse pedido não está na nossa base de dados: 1- ${orderId}`
+    );
   }
   checkPermissions(req.user, order.user);
 
@@ -79,10 +84,10 @@ const updateOrder = async (req, res) => {
   res.status(StatusCodes.OK).json({ order });
 };
 const deleteOrder = async (req, res) => {
-  const { id: orderId } = req.params;
-  const order = await Order.findById(orderId);
+  const orderId = req.params.id.trim();
+  const order = await Order.findById({ _id: orderId });
   await order.remove();
-  res.status(StatusCodes.OK).json({ order });
+  res.status(StatusCodes.OK).json({ msg: "Order Deleted Successfully" });
 };
 module.exports = {
   getAllOrders,

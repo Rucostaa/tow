@@ -13,10 +13,7 @@ const {
   deleteOrder,
 } = require("../controllers/orderController");
 
-router
-  .route("/")
-  .get(authenticateUser, getAllOrders)
-  .post(authenticateUser, createOrder);
+router.route("/").get(getAllOrders).post(createOrder);
 
 router.route("/getAllOrders").get(getCurrentUserOrders);
 
